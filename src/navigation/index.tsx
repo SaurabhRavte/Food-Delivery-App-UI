@@ -1,8 +1,8 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import { Text } from "react-native";
 
 import OnboardingOne from "../screens/auth/OnboardingOne";
 import OnboardingTwo from "../screens/auth/OnboardingTwo";
@@ -11,38 +11,57 @@ import Login from "../screens/auth/Login";
 import Register from "../screens/auth/Register";
 import ForgotPassword from "../screens/auth/ForgotPassword";
 
-// Tab screens
 import Home from "../screens/tabs/Home";
 import Search from "../screens/tabs/Search";
 import Orders from "../screens/tabs/Orders";
 import Profile from "../screens/tabs/Profile";
 
-import RestaurantDetails from "../screens/RestaurantDetails";
-import Cart from "../screens/Cart";
+import RestaurantScreen from "../screens/RestaurantScreen";
+import CartScreen from "../screens/CartScreen";
+import MenuItemScreen from "../screens/MenuItemScreen";
+import OrderConfirmScreen from "../screens/OrderConfirmScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
-const RootStack = createStackNavigator();
-const HomeStack = createStackNavigator();
+import { MenuItem } from "../data/mockData";
+
+export type RootStackParamList = {
+  OnboardingOne: undefined;
+  OnboardingTwo: undefined;
+  OnboardingThree: undefined;
+  Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
+  Main: undefined;
+  Home: undefined;
+  Restaurant: { restaurantId: string };
+  MenuItem: { restaurantId: string; itemId: string };
+  Cart: { cart: (MenuItem & { qty: number })[]; restaurantId: string };
+  OrderConfirm: { total: number; restaurantId: string };
+  Profile: undefined;
+};
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
 
-// Home tab
-function HomeStackNav() {
-  return (
-    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
-      <HomeStack.Screen name="HomeMain" component={Home} />
-      <HomeStack.Screen
-        name="RestaurantDetails"
-        component={RestaurantDetails}
-      />
-    </HomeStack.Navigator>
-  );
-}
-
-// Bottom tabs
 function TabsNav() {
   return (
-    <Tabs.Navigator screenOptions={{ headerShown: false }}>
-      <Tabs.Screen name="Home" component={HomeStackNav} />
+    <Tabs.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ color, size }) => {
+          const icons: Record<string, string> = {
+            Home: "🏠",
+            Search: "🔍",
+            Orders: "📦",
+            Profile: "👤",
+          };
+          return (
+            <Text style={{ fontSize: size - 4 }}>{icons[route.name]}</Text>
+          );
+        },
+      })}
+    >
+      <Tabs.Screen name="Home" component={Home} />
       <Tabs.Screen name="Search" component={Search} />
       <Tabs.Screen name="Orders" component={Orders} />
       <Tabs.Screen name="Profile" component={Profile} />
@@ -50,16 +69,6 @@ function TabsNav() {
   );
 }
 
-// Drawer tabs
-function DrawerNav() {
-  return (
-    <Drawer.Navigator screenOptions={{ headerShown: false }}>
-      <Drawer.Screen name="TabsGroup" component={TabsNav} />
-    </Drawer.Navigator>
-  );
-}
-
-// Root stack
 export default function Navigation() {
   return (
     <NavigationContainer>
@@ -73,9 +82,13 @@ export default function Navigation() {
         <RootStack.Screen name="Login" component={Login} />
         <RootStack.Screen name="Register" component={Register} />
         <RootStack.Screen name="ForgotPassword" component={ForgotPassword} />
-
-        <RootStack.Screen name="Main" component={DrawerNav} />
-        <RootStack.Screen name="Cart" component={Cart} />
+        <RootStack.Screen name="Main" component={TabsNav} />
+        <RootStack.Screen name="Home" component={TabsNav} />
+        <RootStack.Screen name="Restaurant" component={RestaurantScreen} />
+        <RootStack.Screen name="MenuItem" component={MenuItemScreen} />
+        <RootStack.Screen name="Cart" component={CartScreen} />
+        <RootStack.Screen name="OrderConfirm" component={OrderConfirmScreen} />
+        <RootStack.Screen name="Profile" component={ProfileScreen} />
       </RootStack.Navigator>
     </NavigationContainer>
   );
