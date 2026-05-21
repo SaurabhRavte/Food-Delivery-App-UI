@@ -14,7 +14,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS, CATEGORIES } from "../data/mockData";
 import { useAuth } from "../context/AuthContext";
-import type { RootStackParamList } from "../navigation/RootNavigator";
+import type { RootStackParamList } from "../navigation";
 
 type Nav = NativeStackNavigationProp<RootStackParamList, "Home">;
 
