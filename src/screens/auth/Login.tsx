@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
 import { COLORS } from "../../theme/colors";
 
@@ -54,7 +54,7 @@ export default function LoginScreen() {
             <View style={styles.logoCircle}>
               <Text style={styles.logoEmoji}>🍽️</Text>
             </View>
-            <Text style={styles.appName}>FoodieGo</Text>
+            <Text style={styles.appName}>Cravely</Text>
             <Text style={styles.tagline}>Delicious food, delivered fast</Text>
           </View>
 

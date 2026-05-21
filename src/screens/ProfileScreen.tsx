@@ -5,8 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { COLORS } from "../theme/colors";
 import { useAuth } from "../context/AuthContext";
@@ -20,7 +20,7 @@ export default function ProfileScreen() {
     { icon: "📍", label: "Saved Addresses", sub: "Flat 3B, MG Road" },
     { icon: "💳", label: "Payment Methods", sub: "Cash on Delivery" },
     { icon: "🎁", label: "Offers & Coupons", sub: "2 active coupons" },
-    { icon: "⭐", label: "Rate Us", sub: "Love FoodieGo? Tell us!" },
+    { icon: "⭐", label: "Rate Us", sub: "Love Cravely? Tell us!" },
     { icon: "🔔", label: "Notifications", sub: "Enabled" },
     { icon: "🛡️", label: "Privacy Policy", sub: "" },
     { icon: "❓", label: "Help & Support", sub: "" },
@@ -103,7 +103,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>🚪 Sign Out</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>FoodieGo v1.0.0</Text>
+        <Text style={styles.version}>Cravely v1.0.0</Text>
         <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
