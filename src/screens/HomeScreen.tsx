@@ -9,14 +9,28 @@ import {
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import {
+  useNavigation,
+  CompositeNavigationProp,
+} from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS, CATEGORIES } from "../data/mockData";
 import { useAuth } from "../context/AuthContext";
-import type { RootStackParamList } from "../navigation";
+import type { AppStackParamList } from "../navigation";
 
-type Nav = NativeStackNavigationProp<RootStackParamList, "Home">;
+type TabParamList = {
+  Home: undefined;
+  Search: undefined;
+  Orders: undefined;
+  Profile: undefined;
+};
+
+type Nav = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList, "Home">,
+  NativeStackNavigationProp<AppStackParamList>
+>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
@@ -45,7 +59,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>
-              Hey, {user?.name.split(" ")[0]} 👋
+              Hey, {user?.name?.split(" ")[0] ?? "there"} 👋
             </Text>
             <View style={styles.locationRow}>
               <Text style={styles.locationIcon}>📍</Text>

@@ -26,16 +26,22 @@ export default function ProfileScreen() {
     { icon: "❓", label: "Help & Support", sub: "" },
   ];
 
+  const canGoBack = navigation.canGoBack();
+
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
+        {canGoBack ? (
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backIcon}>←</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={{ width: 40 }} />
       </View>
@@ -46,7 +52,7 @@ export default function ProfileScreen() {
           <View style={styles.avatarCircle}>
             <Text style={styles.avatarText}>{user?.avatar}</Text>
           </View>
-          <View style={{ marginLeft: 14 }}>
+          <View style={{ marginLeft: 14, flex: 1 }}>
             <Text style={styles.userName}>{user?.name}</Text>
             <Text style={styles.userEmail}>{user?.email}</Text>
             <Text style={styles.userPhone}>{user?.phone}</Text>
@@ -157,7 +163,6 @@ const styles = StyleSheet.create({
   userEmail: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   userPhone: { fontSize: 13, color: COLORS.textSecondary },
   editBtn: {
-    marginLeft: "auto",
     backgroundColor: COLORS.background,
     borderRadius: 10,
     paddingHorizontal: 14,

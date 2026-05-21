@@ -20,27 +20,33 @@ import RestaurantScreen from "../screens/RestaurantScreen";
 import CartScreen from "../screens/CartScreen";
 import MenuItemScreen from "../screens/MenuItemScreen";
 import OrderConfirmScreen from "../screens/OrderConfirmScreen";
-import ProfileScreen from "../screens/ProfileScreen";
 
-import { MenuItem } from "../data/mockData";
+import { useAuth } from "../context/AuthContext";
+import { COLORS } from "../theme/colors";
 
-export type RootStackParamList = {
+// Auth routes
+export type AuthStackParamList = {
   OnboardingOne: undefined;
   OnboardingTwo: undefined;
   OnboardingThree: undefined;
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  Main: undefined;
-  Home: undefined;
-  Restaurant: { restaurantId: string };
-  MenuItem: { restaurantId: string; itemId: string };
-  Cart: { cart: (MenuItem & { qty: number })[]; restaurantId: string };
-  OrderConfirm: { total: number; restaurantId: string };
-  Profile: undefined;
 };
 
-const RootStack = createNativeStackNavigator<RootStackParamList>();
+// Routes logged-in user
+export type AppStackParamList = {
+  Main: undefined;
+  Restaurant: { restaurantId: string };
+  MenuItem: { restaurantId: string; itemId: string };
+  Cart: undefined;
+  OrderConfirm: { total: number; restaurantId: string };
+};
+
+export type RootStackParamList = AuthStackParamList & AppStackParamList;
+
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const AppStack = createNativeStackNavigator<AppStackParamList>();
 const Tabs = createBottomTabNavigator();
 
 function TabsNav() {
@@ -48,16 +54,18 @@ function TabsNav() {
     <Tabs.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ color, size }) => {
+        tabBarActiveTintColor: COLORS.accent,
+        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarIcon: ({ size }) => {
           const icons: Record<string, string> = {
             Home: "🏠",
             Search: "🔍",
             Orders: "📦",
             Profile: "👤",
           };
-          return (
-            <Text style={{ fontSize: size - 4 }}>{icons[route.name]}</Text>
-          );
+
+          const fontSize = (size ?? 22) - 4;
+          return <Text style={{ fontSize }}>{icons[route.name]}</Text>;
         },
       })}
     >
@@ -69,27 +77,42 @@ function TabsNav() {
   );
 }
 
+function AuthNavigator() {
+  return (
+    <AuthStack.Navigator
+      initialRouteName="OnboardingOne"
+      screenOptions={{ headerShown: false }}
+    >
+      <AuthStack.Screen name="OnboardingOne" component={OnboardingOne} />
+      <AuthStack.Screen name="OnboardingTwo" component={OnboardingTwo} />
+      <AuthStack.Screen name="OnboardingThree" component={OnboardingThree} />
+      <AuthStack.Screen name="Login" component={Login} />
+      <AuthStack.Screen name="Register" component={Register} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
+    </AuthStack.Navigator>
+  );
+}
+
+function AppNavigator() {
+  return (
+    <AppStack.Navigator
+      initialRouteName="Main"
+      screenOptions={{ headerShown: false }}
+    >
+      <AppStack.Screen name="Main" component={TabsNav} />
+      <AppStack.Screen name="Restaurant" component={RestaurantScreen} />
+      <AppStack.Screen name="MenuItem" component={MenuItemScreen} />
+      <AppStack.Screen name="Cart" component={CartScreen} />
+      <AppStack.Screen name="OrderConfirm" component={OrderConfirmScreen} />
+    </AppStack.Navigator>
+  );
+}
+
 export default function Navigation() {
+  const { user } = useAuth();
   return (
     <NavigationContainer>
-      <RootStack.Navigator
-        initialRouteName="OnboardingOne"
-        screenOptions={{ headerShown: false }}
-      >
-        <RootStack.Screen name="OnboardingOne" component={OnboardingOne} />
-        <RootStack.Screen name="OnboardingTwo" component={OnboardingTwo} />
-        <RootStack.Screen name="OnboardingThree" component={OnboardingThree} />
-        <RootStack.Screen name="Login" component={Login} />
-        <RootStack.Screen name="Register" component={Register} />
-        <RootStack.Screen name="ForgotPassword" component={ForgotPassword} />
-        <RootStack.Screen name="Main" component={TabsNav} />
-        <RootStack.Screen name="Home" component={TabsNav} />
-        <RootStack.Screen name="Restaurant" component={RestaurantScreen} />
-        <RootStack.Screen name="MenuItem" component={MenuItemScreen} />
-        <RootStack.Screen name="Cart" component={CartScreen} />
-        <RootStack.Screen name="OrderConfirm" component={OrderConfirmScreen} />
-        <RootStack.Screen name="Profile" component={ProfileScreen} />
-      </RootStack.Navigator>
+      {user ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

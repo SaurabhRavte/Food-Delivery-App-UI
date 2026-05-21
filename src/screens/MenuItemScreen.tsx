@@ -11,21 +11,41 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS } from "../data/mockData";
-import type { RootStackParamList } from "../navigation";
+import { useCart } from "../context/CartContext";
+import type { AppStackParamList } from "../navigation";
 
-type Nav = NativeStackNavigationProp<RootStackParamList, "MenuItem">;
-type Route = RouteProp<RootStackParamList, "MenuItem">;
+type Nav = NativeStackNavigationProp<AppStackParamList, "MenuItem">;
+type Route = RouteProp<AppStackParamList, "MenuItem">;
 
 export default function MenuItemScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { restaurantId, itemId } = route.params;
 
-  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId)!;
-  const item = restaurant.menu.find((m) => m.id === itemId)!;
+  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId);
+  const item = restaurant?.menu.find((m) => m.id === itemId);
+  const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
 
+  if (!restaurant || !item) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={{ padding: 24 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={{ fontSize: 20, color: COLORS.accent }}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={{ marginTop: 24, fontSize: 18 }}>Item not found.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const total = item.price * qty;
+
+  const handleAddToCart = () => {
+    addToCart(item, restaurant.id, qty);
+    navigation.goBack();
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -125,10 +145,7 @@ export default function MenuItemScreen() {
 
       {/* Add to Cart CTA */}
       <View style={styles.ctaBar}>
-        <TouchableOpacity
-          style={styles.ctaBtn}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.ctaBtn} onPress={handleAddToCart}>
           <Text style={styles.ctaBtnText}>+ Add to Cart • ₹{total}</Text>
         </TouchableOpacity>
       </View>

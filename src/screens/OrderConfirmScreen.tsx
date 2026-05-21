@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -7,22 +7,30 @@ import {
   Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  RouteProp,
+  CommonActions,
+} from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS } from "../data/mockData";
-import type { RootStackParamList } from "../navigation";
+import type { AppStackParamList } from "../navigation";
 
-type Nav = NativeStackNavigationProp<RootStackParamList, "OrderConfirm">;
-type Route = RouteProp<RootStackParamList, "OrderConfirm">;
-
-const ORDER_ID = `#FG${Math.floor(100000 + Math.random() * 900000)}`;
+type Nav = NativeStackNavigationProp<AppStackParamList, "OrderConfirm">;
+type Route = RouteProp<AppStackParamList, "OrderConfirm">;
 
 export default function OrderConfirmScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { total, restaurantId } = route.params;
-  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId)!;
+  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId);
+
+  const orderId = useMemo(
+    () => `#FG${Math.floor(100000 + Math.random() * 900000)}`,
+    [],
+  );
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -43,6 +51,15 @@ export default function OrderConfirmScreen() {
     ]).start();
   }, []);
 
+  const goHome = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      }),
+    );
+  };
+
   const steps = [
     { icon: "✅", label: "Order Confirmed", done: true },
     { icon: "👨‍🍳", label: "Being Prepared", done: true },
@@ -62,10 +79,11 @@ export default function OrderConfirmScreen() {
 
         <Animated.View style={{ opacity: fadeAnim, alignItems: "center" }}>
           <Text style={styles.title}>Order Placed!</Text>
-          <Text style={styles.orderId}>{ORDER_ID}</Text>
+          <Text style={styles.orderId}>{orderId}</Text>
           <Text style={styles.subtitle}>
-            Your food from {restaurant.name} is being prepared.{"\n"}
-            Estimated delivery: {restaurant.deliveryTime}
+            Your food from {restaurant?.name ?? "the restaurant"} is being
+            prepared.{"\n"}
+            Estimated delivery: {restaurant?.deliveryTime ?? "30-40 min"}
           </Text>
         </Animated.View>
 
@@ -119,17 +137,11 @@ export default function OrderConfirmScreen() {
         </View>
 
         {/* Back to Home */}
-        <TouchableOpacity
-          style={styles.homeBtn}
-          onPress={() => navigation.navigate("Home")}
-        >
+        <TouchableOpacity style={styles.homeBtn} onPress={goHome}>
           <Text style={styles.homeBtnText}>Back to Home</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.trackBtn}
-          onPress={() => navigation.navigate("Home")}
-        >
+        <TouchableOpacity style={styles.trackBtn} onPress={goHome}>
           <Text style={styles.trackBtnText}>🗺 Track Order</Text>
         </TouchableOpacity>
       </View>
@@ -177,7 +189,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 24,
   },
-
   stepsCard: {
     width: "100%",
     backgroundColor: COLORS.white,
@@ -194,7 +205,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   stepLabel: { fontSize: 14, fontWeight: "600" },
-
   summaryCard: {
     width: "100%",
     backgroundColor: COLORS.white,
@@ -209,7 +219,6 @@ const styles = StyleSheet.create({
   },
   summaryLabel: { fontSize: 14, color: COLORS.textSecondary },
   summaryVal: { fontSize: 14, fontWeight: "700", color: COLORS.accent },
-
   homeBtn: {
     width: "100%",
     backgroundColor: COLORS.accent,

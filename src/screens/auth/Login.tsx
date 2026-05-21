@@ -91,7 +91,7 @@ export default function LoginScreen() {
                   onPress={() => setShowPass((v) => !v)}
                   style={styles.eyeBtn}
                 >
-                  <Text style={styles.eyeText}>{showPass ? "🙈" : "👁️"}</Text>
+                  <Text style={styles.eyeText}>{showPass ? "🫣" : "👁️"}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -105,12 +105,6 @@ export default function LoginScreen() {
                 {loading ? "Signing in..." : "Sign In"}
               </Text>
             </TouchableOpacity>
-
-            <View style={styles.hintBox}>
-              <Text style={styles.hintText}>
-                Demo: saurabh@example.com / 1234
-              </Text>
-            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

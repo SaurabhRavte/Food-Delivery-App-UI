@@ -12,21 +12,42 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS, MenuItem } from "../data/mockData";
-import type { RootStackParamList } from "../navigation";
+import { useCart } from "../context/CartContext";
+import type { AppStackParamList } from "../navigation";
 
-type Nav = NativeStackNavigationProp<RootStackParamList, "Restaurant">;
-type Route = RouteProp<RootStackParamList, "Restaurant">;
-
-type CartItem = MenuItem & { qty: number };
+type Nav = NativeStackNavigationProp<AppStackParamList, "Restaurant">;
+type Route = RouteProp<AppStackParamList, "Restaurant">;
 
 export default function RestaurantScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { restaurantId } = route.params;
 
-  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId)!;
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId);
+  const { addToCart, removeFromCart, getQty, totalItems, totalPrice } =
+    useCart();
   const [activeTab, setActiveTab] = useState<string>("All");
+
+  if (!restaurant) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={{ padding: 24 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={{ fontSize: 20, color: COLORS.accent }}>← Back</Text>
+          </TouchableOpacity>
+          <Text
+            style={{
+              marginTop: 24,
+              fontSize: 18,
+              color: COLORS.textPrimary,
+            }}
+          >
+            Restaurant not found.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const categories = [
     "All",
@@ -37,29 +58,8 @@ export default function RestaurantScreen() {
       ? restaurant.menu
       : restaurant.menu.filter((m) => m.category === activeTab);
 
-  const addToCart = (item: MenuItem) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c.id === item.id);
-      if (existing)
-        return prev.map((c) =>
-          c.id === item.id ? { ...c, qty: c.qty + 1 } : c,
-        );
-      return [...prev, { ...item, qty: 1 }];
-    });
-  };
-
-  const removeFromCart = (item: MenuItem) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c.id === item.id);
-      if (!existing) return prev;
-      if (existing.qty === 1) return prev.filter((c) => c.id !== item.id);
-      return prev.map((c) => (c.id === item.id ? { ...c, qty: c.qty - 1 } : c));
-    });
-  };
-
-  const getQty = (id: string) => cart.find((c) => c.id === id)?.qty ?? 0;
-  const totalItems = cart.reduce((s, c) => s + c.qty, 0);
-  const totalPrice = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const handleAdd = (item: MenuItem) => addToCart(item, restaurant.id, 1);
+  const handleRemove = (item: MenuItem) => removeFromCart(item.id);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -147,7 +147,7 @@ export default function RestaurantScreen() {
               style={styles.menuCard}
               onPress={() =>
                 navigation.navigate("MenuItem", {
-                  restaurantId,
+                  restaurantId: restaurant.id,
                   itemId: item.id,
                 })
               }
@@ -183,7 +183,7 @@ export default function RestaurantScreen() {
                 {qty === 0 ? (
                   <TouchableOpacity
                     style={styles.addBtn}
-                    onPress={() => addToCart(item)}
+                    onPress={() => handleAdd(item)}
                   >
                     <Text style={styles.addBtnText}>+ ADD</Text>
                   </TouchableOpacity>
@@ -191,14 +191,14 @@ export default function RestaurantScreen() {
                   <View style={styles.stepper}>
                     <TouchableOpacity
                       style={styles.stepBtn}
-                      onPress={() => removeFromCart(item)}
+                      onPress={() => handleRemove(item)}
                     >
                       <Text style={styles.stepText}>−</Text>
                     </TouchableOpacity>
                     <Text style={styles.stepQty}>{qty}</Text>
                     <TouchableOpacity
                       style={styles.stepBtn}
-                      onPress={() => addToCart(item)}
+                      onPress={() => handleAdd(item)}
                     >
                       <Text style={styles.stepText}>+</Text>
                     </TouchableOpacity>
@@ -222,7 +222,7 @@ export default function RestaurantScreen() {
           </View>
           <TouchableOpacity
             style={styles.viewCartBtn}
-            onPress={() => navigation.navigate("Cart", { cart, restaurantId })}
+            onPress={() => navigation.navigate("Cart")}
           >
             <Text style={styles.viewCartText}>View Cart →</Text>
           </TouchableOpacity>

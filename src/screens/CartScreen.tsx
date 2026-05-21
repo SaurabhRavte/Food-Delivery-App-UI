@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -10,207 +10,184 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { COLORS } from "../theme/colors";
-import { RESTAURANTS, MenuItem } from "../data/mockData";
-import type { RootStackParamList } from "../navigation";
-type Nav = NativeStackNavigationProp<RootStackParamList, "Cart">;
-type Route = RouteProp<RootStackParamList, "Cart">;
-type CartItem = MenuItem & { qty: number };
+import { RESTAURANTS } from "../data/mockData";
+import { useCart } from "../context/CartContext";
+import type { AppStackParamList } from "../navigation";
+
+type Nav = NativeStackNavigationProp<AppStackParamList, "Cart">;
 
 export default function CartScreen() {
   const navigation = useNavigation<Nav>();
-  const route = useRoute<Route>();
-  const { restaurantId } = route.params;
-  const restaurant = RESTAURANTS.find((r) => r.id === restaurantId)!;
-  const [cart, setCart] = useState<CartItem[]>(
-    (route.params.cart as CartItem[]) ?? [],
-  );
-  const add = (id: string) =>
-    setCart((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c)),
-    );
-  const remove = (id: string) =>
-    setCart((prev) => {
-      const item = prev.find((c) => c.id === id)!;
-      if (item.qty === 1) return prev.filter((c) => c.id !== id);
-      return prev.map((c) => (c.id === id ? { ...c, qty: c.qty - 1 } : c));
-    });
-  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const delivery = restaurant.deliveryFee;
+  const {
+    cart,
+    restaurantId,
+    addToCart,
+    removeFromCart,
+    totalPrice,
+    clearCart,
+  } = useCart();
+
+  const restaurant = restaurantId
+    ? RESTAURANTS.find((r) => r.id === restaurantId)
+    : null;
+
+  const subtotal = totalPrice;
+  const delivery = restaurant?.deliveryFee ?? 0;
   const tax = Math.round(subtotal * 0.05);
   const total = subtotal + delivery + tax;
+
+  const itemCount = cart.reduce((s, c) => s + c.qty, 0);
+
+  const handleAddOne = (id: string) => {
+    const existing = cart.find((c) => c.id === id);
+    if (existing && restaurantId) addToCart(existing, restaurantId, 1);
+  };
+
+  const handlePlaceOrder = () => {
+    if (!restaurantId) return;
+    navigation.navigate("OrderConfirm", { total, restaurantId });
+
+    setTimeout(clearCart, 100);
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
-      {" "}
-      {/* Header */}{" "}
+      {/* Header */}
       <View style={styles.header}>
-        {" "}
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          {" "}
-          <Text style={styles.backIcon}>←</Text>{" "}
-        </TouchableOpacity>{" "}
-        <Text style={styles.headerTitle}>Your Cart</Text>{" "}
+          <Text style={styles.backIcon}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Your Cart</Text>
         <View style={styles.badge}>
-          {" "}
-          <Text style={styles.badgeText}>
-            {cart.reduce((s, c) => s + c.qty, 0)}
-          </Text>{" "}
-        </View>{" "}
-      </View>{" "}
-      {cart.length === 0 ? (
+          <Text style={styles.badgeText}>{itemCount}</Text>
+        </View>
+      </View>
+
+      {cart.length === 0 || !restaurant ? (
         <View style={styles.emptyState}>
-          {" "}
-          <Text style={{ fontSize: 64 }}>🛒</Text>{" "}
-          <Text style={styles.emptyText}>Your cart is empty</Text>{" "}
+          <Text style={{ fontSize: 64 }}>🛒</Text>
+          <Text style={styles.emptyText}>Your cart is empty</Text>
           <TouchableOpacity
             style={styles.browseBtn}
             onPress={() => navigation.goBack()}
           >
-            {" "}
-            <Text style={styles.browseBtnText}>Browse Menu</Text>{" "}
-          </TouchableOpacity>{" "}
+            <Text style={styles.browseBtnText}>Browse Menu</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <>
-          {" "}
           <ScrollView showsVerticalScrollIndicator={false}>
-            {" "}
-            {/* Restaurant info */}{" "}
+            {/* Restaurant info */}
             <View style={styles.restaurantRow}>
-              {" "}
-              <Text style={{ fontSize: 28 }}>{restaurant.emoji}</Text>{" "}
+              <Text style={{ fontSize: 28 }}>{restaurant.emoji}</Text>
               <View style={{ marginLeft: 10 }}>
-                {" "}
-                <Text style={styles.restaurantName}>
-                  {restaurant.name}
-                </Text>{" "}
+                <Text style={styles.restaurantName}>{restaurant.name}</Text>
                 <Text style={styles.restaurantSub}>
                   {restaurant.deliveryTime}
-                </Text>{" "}
-              </View>{" "}
-            </View>{" "}
-            {/* Items */} <Text style={styles.sectionTitle}>Order Items</Text>{" "}
+                </Text>
+              </View>
+            </View>
+
+            {/* Items */}
+            <Text style={styles.sectionTitle}>Order Items</Text>
             {cart.map((item) => (
               <View key={item.id} style={styles.cartItem}>
-                {" "}
-                <Text style={{ fontSize: 32 }}>{item.emoji}</Text>{" "}
+                <Text style={{ fontSize: 32 }}>{item.emoji}</Text>
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  {" "}
-                  <Text style={styles.itemName}>{item.name}</Text>{" "}
-                  <Text style={styles.itemPrice}>₹{item.price} each</Text>{" "}
-                </View>{" "}
+                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.itemPrice}>₹{item.price} each</Text>
+                </View>
                 <View style={styles.stepper}>
-                  {" "}
                   <TouchableOpacity
                     style={styles.stepBtn}
-                    onPress={() => remove(item.id)}
+                    onPress={() => removeFromCart(item.id)}
                   >
-                    {" "}
-                    <Text style={styles.stepText}>−</Text>{" "}
-                  </TouchableOpacity>{" "}
-                  <Text style={styles.qtyText}>{item.qty}</Text>{" "}
+                    <Text style={styles.stepText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.qtyText}>{item.qty}</Text>
                   <TouchableOpacity
                     style={styles.stepBtn}
-                    onPress={() => add(item.id)}
+                    onPress={() => handleAddOne(item.id)}
                   >
-                    {" "}
-                    <Text style={styles.stepText}>+</Text>{" "}
-                  </TouchableOpacity>{" "}
-                </View>{" "}
-                <Text style={styles.itemTotal}>
-                  ₹{item.price * item.qty}
-                </Text>{" "}
+                    <Text style={styles.stepText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.itemTotal}>₹{item.price * item.qty}</Text>
               </View>
-            ))}{" "}
-            {/* Coupon */}{" "}
+            ))}
+
+            {/* Coupon */}
             <View style={styles.couponBox}>
-              {" "}
-              <Text style={styles.couponIcon}>🏷️</Text>{" "}
-              <Text style={styles.couponText}>Apply coupon code</Text>{" "}
+              <Text style={styles.couponIcon}>🏷️</Text>
+              <Text style={styles.couponText}>Apply coupon code</Text>
               <TouchableOpacity style={styles.couponBtn}>
-                {" "}
-                <Text style={styles.couponBtnText}>APPLY</Text>{" "}
-              </TouchableOpacity>{" "}
-            </View>{" "}
-            {/* Bill Summary */}{" "}
+                <Text style={styles.couponBtnText}>APPLY</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Bill Summary */}
             <View style={styles.billCard}>
-              {" "}
-              <Text style={styles.billTitle}>Bill Summary</Text>{" "}
+              <Text style={styles.billTitle}>Bill Summary</Text>
               <View style={styles.billRow}>
-                {" "}
-                <Text style={styles.billLabel}>Item Total</Text>{" "}
-                <Text style={styles.billVal}>₹{subtotal}</Text>{" "}
-              </View>{" "}
+                <Text style={styles.billLabel}>Item Total</Text>
+                <Text style={styles.billVal}>₹{subtotal}</Text>
+              </View>
               <View style={styles.billRow}>
-                {" "}
-                <Text style={styles.billLabel}>Delivery Fee</Text>{" "}
+                <Text style={styles.billLabel}>Delivery Fee</Text>
                 <Text
                   style={[
                     styles.billVal,
                     delivery === 0 && { color: COLORS.success },
                   ]}
                 >
-                  {" "}
-                  {delivery === 0 ? "FREE" : `₹${delivery}`}{" "}
-                </Text>{" "}
-              </View>{" "}
+                  {delivery === 0 ? "FREE" : `₹${delivery}`}
+                </Text>
+              </View>
               <View style={styles.billRow}>
-                {" "}
-                <Text style={styles.billLabel}>GST & Charges</Text>{" "}
-                <Text style={styles.billVal}>₹{tax}</Text>{" "}
-              </View>{" "}
-              <View style={styles.billDivider} />{" "}
+                <Text style={styles.billLabel}>GST & Charges</Text>
+                <Text style={styles.billVal}>₹{tax}</Text>
+              </View>
+              <View style={styles.billDivider} />
               <View style={styles.billRow}>
-                {" "}
-                <Text style={styles.billTotalLabel}>To Pay</Text>{" "}
-                <Text style={styles.billTotalVal}>₹{total}</Text>{" "}
-              </View>{" "}
-            </View>{" "}
-            {/* Delivery Address */}{" "}
+                <Text style={styles.billTotalLabel}>To Pay</Text>
+                <Text style={styles.billTotalVal}>₹{total}</Text>
+              </View>
+            </View>
+
+            {/* Delivery Address */}
             <View style={styles.addressBox}>
-              {" "}
-              <Text style={styles.addressIcon}>📍</Text>{" "}
+              <Text style={styles.addressIcon}>📍</Text>
               <View style={{ flex: 1 }}>
-                {" "}
-                <Text style={styles.addressLabel}>Delivering to</Text>{" "}
-                <Text style={styles.addressText}>
-                  Flat 3B, MG Road, Indore
-                </Text>{" "}
-              </View>{" "}
+                <Text style={styles.addressLabel}>Delivering to</Text>
+                <Text style={styles.addressText}>Flat 3B, MG Road, Indore</Text>
+              </View>
               <TouchableOpacity>
-                {" "}
-                <Text style={styles.changeText}>Change</Text>{" "}
-              </TouchableOpacity>{" "}
-            </View>{" "}
-            <View style={{ height: 100 }} />{" "}
-          </ScrollView>{" "}
-          {/* Place Order */}{" "}
+                <Text style={styles.changeText}>Change</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ height: 100 }} />
+          </ScrollView>
+
+          {/* Place Order */}
           <View style={styles.ctaBar}>
-            {" "}
             <View>
-              {" "}
-              <Text style={styles.ctaLabel}>
-                {cart.reduce((s, c) => s + c.qty, 0)} items
-              </Text>{" "}
-              <Text style={styles.ctaTotal}>₹{total}</Text>{" "}
-            </View>{" "}
-            <TouchableOpacity
-              style={styles.ctaBtn}
-              onPress={() =>
-                navigation.navigate("OrderConfirm", { total, restaurantId })
-              }
-            >
-              {" "}
-              <Text style={styles.ctaBtnText}>Place Order →</Text>{" "}
-            </TouchableOpacity>{" "}
-          </View>{" "}
+              <Text style={styles.ctaLabel}>{itemCount} items</Text>
+              <Text style={styles.ctaTotal}>₹{total}</Text>
+            </View>
+            <TouchableOpacity style={styles.ctaBtn} onPress={handlePlaceOrder}>
+              <Text style={styles.ctaBtnText}>Place Order →</Text>
+            </TouchableOpacity>
+          </View>
         </>
-      )}{" "}
+      )}
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   header: { flexDirection: "row", alignItems: "center", padding: 16, gap: 12 },
