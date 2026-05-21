@@ -1,10 +1,10 @@
 export const MOCK_USER = {
   id: "user1",
   name: "Saurabh Ravte",
-  email: "saurabh.dev@gamil.com",
+  email: "saurabh@example.com",
   password: "1234",
   phone: "+91 12345 67890",
-  address: "Shankar Nagar, Raipur, Chhattisgarh",
+  address: "Rajnandgaon, Chhattisgarh",
   avatar: "SR",
 };
 
