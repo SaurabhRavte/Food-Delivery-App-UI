@@ -14,12 +14,15 @@ import {
   CommonActions,
 } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS } from "../data/mockData";
 import type { AppStackParamList } from "../navigation";
 
 type Nav = NativeStackNavigationProp<AppStackParamList, "OrderConfirm">;
 type Route = RouteProp<AppStackParamList, "OrderConfirm">;
+
+type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
 export default function OrderConfirmScreen() {
   const navigation = useNavigation<Nav>();
@@ -60,11 +63,11 @@ export default function OrderConfirmScreen() {
     );
   };
 
-  const steps = [
-    { icon: "✅", label: "Order Confirmed", done: true },
-    { icon: "👨‍🍳", label: "Being Prepared", done: true },
-    { icon: "🛵", label: "Out for Delivery", done: false },
-    { icon: "🏠", label: "Delivered", done: false },
+  const steps: { icon: IoniconName; label: string; done: boolean }[] = [
+    { icon: "checkmark-circle", label: "Order Confirmed", done: true },
+    { icon: "restaurant", label: "Being Prepared", done: true },
+    { icon: "bicycle", label: "Out for Delivery", done: false },
+    { icon: "home", label: "Delivered", done: false },
   ];
 
   return (
@@ -74,7 +77,7 @@ export default function OrderConfirmScreen() {
         <Animated.View
           style={[styles.successCircle, { transform: [{ scale: scaleAnim }] }]}
         >
-          <Text style={styles.successEmoji}>🎉</Text>
+          <Ionicons name="checkmark" size={56} color={COLORS.white} />
         </Animated.View>
 
         <Animated.View style={{ opacity: fadeAnim, alignItems: "center" }}>
@@ -99,7 +102,11 @@ export default function OrderConfirmScreen() {
                   },
                 ]}
               >
-                <Text style={{ fontSize: 16 }}>{step.icon}</Text>
+                <Ionicons
+                  name={step.icon}
+                  size={18}
+                  color={step.done ? COLORS.white : COLORS.textMuted}
+                />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text
@@ -112,9 +119,7 @@ export default function OrderConfirmScreen() {
                 </Text>
               </View>
               {step.done && (
-                <Text style={{ color: COLORS.success, fontWeight: "700" }}>
-                  ✓
-                </Text>
+                <Ionicons name="checkmark" size={18} color={COLORS.success} />
               )}
             </View>
           ))}
@@ -132,7 +137,7 @@ export default function OrderConfirmScreen() {
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Delivering to</Text>
-            <Text style={styles.summaryVal}>Flat 3B, MG Road</Text>
+            <Text style={styles.summaryVal}>Flat 27,3rd Floor, West</Text>
           </View>
         </View>
 
@@ -142,7 +147,8 @@ export default function OrderConfirmScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.trackBtn} onPress={goHome}>
-          <Text style={styles.trackBtnText}>🗺 Track Order</Text>
+          <Ionicons name="map-outline" size={18} color={COLORS.accent} />
+          <Text style={styles.trackBtnText}>Track Order</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -156,16 +162,15 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.success,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
-    shadowColor: COLORS.accent,
+    shadowColor: COLORS.success,
     shadowOpacity: 0.35,
     shadowRadius: 16,
     elevation: 10,
   },
-  successEmoji: { fontSize: 48 },
   title: {
     fontSize: 28,
     fontWeight: "800",
@@ -234,10 +239,13 @@ const styles = StyleSheet.create({
   homeBtnText: { color: COLORS.white, fontSize: 16, fontWeight: "700" },
   trackBtn: {
     width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 16,
-    alignItems: "center",
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },

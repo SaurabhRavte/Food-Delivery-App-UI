@@ -6,10 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Image,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS, MenuItem } from "../data/mockData";
 import { useCart } from "../context/CartContext";
@@ -32,8 +35,11 @@ export default function RestaurantScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={{ padding: 24 }}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{ fontSize: 20, color: COLORS.accent }}>← Back</Text>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={20} color={COLORS.accent} />
           </TouchableOpacity>
           <Text
             style={{
@@ -62,7 +68,7 @@ export default function RestaurantScreen() {
   const handleRemove = (item: MenuItem) => removeFromCart(item.id);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Header */}
@@ -71,22 +77,29 @@ export default function RestaurantScreen() {
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <Ionicons name="arrow-back" size={20} color={COLORS.accent} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.headerTitle}>{restaurant.name}</Text>
-          <Text style={styles.headerSub}>{restaurant.cuisine}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {restaurant.name}
+          </Text>
+          <Text style={styles.headerSub} numberOfLines={1}>
+            {restaurant.cuisine}
+          </Text>
         </View>
         <View style={styles.ratingBadge}>
-          <Text>⭐ {restaurant.rating}</Text>
+          <Ionicons name="star" size={12} color={COLORS.star} />
+          <Text style={styles.ratingBadgeText}>{restaurant.rating}</Text>
         </View>
       </View>
 
-      {/* Info Banner */}
-      <View
-        style={[styles.infoBanner, { backgroundColor: restaurant.bgColor }]}
+      {/* Hero image + info */}
+      <ImageBackground
+        source={{ uri: restaurant.image }}
+        style={styles.heroImage}
+        imageStyle={styles.heroImageInner}
       >
-        <Text style={styles.bannerEmoji}>{restaurant.emoji}</Text>
+        <View style={styles.heroOverlay} />
         <View style={styles.infoGrid}>
           <View style={styles.infoItem}>
             <Text style={styles.infoVal}>{restaurant.deliveryTime}</Text>
@@ -107,7 +120,7 @@ export default function RestaurantScreen() {
             <Text style={styles.infoLabel}>Min Order</Text>
           </View>
         </View>
-      </View>
+      </ImageBackground>
 
       {/* Category Tabs */}
       <ScrollView
@@ -153,8 +166,11 @@ export default function RestaurantScreen() {
               }
               activeOpacity={0.88}
             >
-              <View style={styles.menuItemEmoji}>
-                <Text style={{ fontSize: 40 }}>{item.emoji}</Text>
+              <View style={styles.menuItemImageWrap}>
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.menuItemImage}
+                />
                 <View
                   style={[
                     styles.vegDot,
@@ -174,7 +190,7 @@ export default function RestaurantScreen() {
                 <View style={styles.itemBottom}>
                   <Text style={styles.itemPrice}>₹{item.price}</Text>
                   <View style={styles.itemRating}>
-                    <Text style={{ fontSize: 11 }}>⭐ </Text>
+                    <Ionicons name="star" size={11} color={COLORS.star} />
                     <Text style={styles.itemRatingText}>{item.rating}</Text>
                   </View>
                 </View>
@@ -193,14 +209,14 @@ export default function RestaurantScreen() {
                       style={styles.stepBtn}
                       onPress={() => handleRemove(item)}
                     >
-                      <Text style={styles.stepText}>−</Text>
+                      <Ionicons name="remove" size={18} color={COLORS.white} />
                     </TouchableOpacity>
                     <Text style={styles.stepQty}>{qty}</Text>
                     <TouchableOpacity
                       style={styles.stepBtn}
                       onPress={() => handleAdd(item)}
                     >
-                      <Text style={styles.stepText}>+</Text>
+                      <Ionicons name="add" size={18} color={COLORS.white} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -224,7 +240,8 @@ export default function RestaurantScreen() {
             style={styles.viewCartBtn}
             onPress={() => navigation.navigate("Cart")}
           >
-            <Text style={styles.viewCartText}>View Cart →</Text>
+            <Text style={styles.viewCartText}>View Cart</Text>
+            <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       )}
@@ -250,35 +267,45 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
-  backIcon: { fontSize: 20, color: COLORS.accent },
   headerTitle: { fontSize: 18, fontWeight: "700", color: COLORS.accent },
   headerSub: { fontSize: 12, color: COLORS.textSecondary },
   ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     backgroundColor: "#fff8e1",
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
+  ratingBadgeText: { fontSize: 13, fontWeight: "700", color: "#e6a800" },
 
-  infoBanner: {
+  heroImage: {
     marginHorizontal: 16,
+    height: 130,
     borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
+    overflow: "hidden",
+    justifyContent: "flex-end",
     marginBottom: 12,
   },
-  bannerEmoji: { fontSize: 56, marginRight: 16 },
+  heroImageInner: { borderRadius: 16 },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
   infoGrid: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+    backgroundColor: "rgba(255,255,255,0.95)",
+    margin: 10,
+    borderRadius: 12,
+    padding: 10,
   },
   infoItem: { alignItems: "center" },
-  infoVal: { fontSize: 15, fontWeight: "700", color: COLORS.accent },
+  infoVal: { fontSize: 14, fontWeight: "700", color: COLORS.accent },
   infoLabel: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2 },
-  infoDiv: { width: 1, height: 32, backgroundColor: COLORS.border },
+  infoDiv: { width: 1, height: 26, backgroundColor: COLORS.border },
 
   tabScroll: { paddingLeft: 16, marginBottom: 8, flexGrow: 0 },
   tab: {
@@ -318,15 +345,15 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  menuItemEmoji: {
-    width: 64,
-    height: 64,
-    backgroundColor: COLORS.background,
+  menuItemImageWrap: {
+    width: 72,
+    height: 72,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
     position: "relative",
+    backgroundColor: COLORS.background,
+    overflow: "hidden",
   },
+  menuItemImage: { width: "100%", height: "100%" },
   vegDot: {
     position: "absolute",
     bottom: 4,
@@ -351,7 +378,7 @@ const styles = StyleSheet.create({
   },
   itemBottom: { flexDirection: "row", alignItems: "center", gap: 10 },
   itemPrice: { fontSize: 15, fontWeight: "800", color: COLORS.accent },
-  itemRating: { flexDirection: "row", alignItems: "center" },
+  itemRating: { flexDirection: "row", alignItems: "center", gap: 3 },
   itemRatingText: { fontSize: 12, color: "#e6a800", fontWeight: "700" },
 
   qtyControl: { alignItems: "center" },
@@ -374,7 +401,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  stepText: { color: COLORS.white, fontSize: 18, fontWeight: "700" },
   stepQty: {
     color: COLORS.white,
     fontWeight: "800",
@@ -402,6 +428,9 @@ const styles = StyleSheet.create({
   cartItemCount: { color: COLORS.secondary, fontSize: 12 },
   cartTotal: { color: COLORS.white, fontSize: 18, fontWeight: "800" },
   viewCartBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 10,
     paddingHorizontal: 16,

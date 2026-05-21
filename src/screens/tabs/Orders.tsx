@@ -1,13 +1,16 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../theme/colors";
 
 export default function Orders() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
-        <Text style={styles.emoji}>📦</Text>
+        <View style={styles.iconCircle}>
+          <Ionicons name="receipt-outline" size={56} color={COLORS.accent} />
+        </View>
         <Text style={styles.title}>Your Orders</Text>
         <Text style={styles.subtitle}>
           You haven't placed any orders yet.{"\n"}
@@ -26,7 +29,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
   },
-  emoji: { fontSize: 64, marginBottom: 12 },
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+  },
   title: {
     fontSize: 22,
     fontWeight: "800",

@@ -5,10 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS } from "../data/mockData";
 import { useCart } from "../context/CartContext";
@@ -46,19 +48,18 @@ export default function CartScreen() {
   const handlePlaceOrder = () => {
     if (!restaurantId) return;
     navigation.navigate("OrderConfirm", { total, restaurantId });
-
     setTimeout(clearCart, 100);
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <Ionicons name="arrow-back" size={20} color={COLORS.accent} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Your Cart</Text>
         <View style={styles.badge}>
@@ -68,7 +69,7 @@ export default function CartScreen() {
 
       {cart.length === 0 || !restaurant ? (
         <View style={styles.emptyState}>
-          <Text style={{ fontSize: 64 }}>🛒</Text>
+          <Ionicons name="cart-outline" size={72} color={COLORS.textMuted} />
           <Text style={styles.emptyText}>Your cart is empty</Text>
           <TouchableOpacity
             style={styles.browseBtn}
@@ -82,12 +83,22 @@ export default function CartScreen() {
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Restaurant info */}
             <View style={styles.restaurantRow}>
-              <Text style={{ fontSize: 28 }}>{restaurant.emoji}</Text>
-              <View style={{ marginLeft: 10 }}>
+              <Image
+                source={{ uri: restaurant.image }}
+                style={styles.restaurantImage}
+              />
+              <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                <Text style={styles.restaurantSub}>
-                  {restaurant.deliveryTime}
-                </Text>
+                <View style={styles.restaurantMeta}>
+                  <Ionicons
+                    name="time-outline"
+                    size={12}
+                    color={COLORS.textSecondary}
+                  />
+                  <Text style={styles.restaurantSub}>
+                    {restaurant.deliveryTime}
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -95,9 +106,14 @@ export default function CartScreen() {
             <Text style={styles.sectionTitle}>Order Items</Text>
             {cart.map((item) => (
               <View key={item.id} style={styles.cartItem}>
-                <Text style={{ fontSize: 32 }}>{item.emoji}</Text>
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.cartItemImage}
+                />
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.itemName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
                   <Text style={styles.itemPrice}>₹{item.price} each</Text>
                 </View>
                 <View style={styles.stepper}>
@@ -105,14 +121,14 @@ export default function CartScreen() {
                     style={styles.stepBtn}
                     onPress={() => removeFromCart(item.id)}
                   >
-                    <Text style={styles.stepText}>−</Text>
+                    <Ionicons name="remove" size={16} color={COLORS.white} />
                   </TouchableOpacity>
                   <Text style={styles.qtyText}>{item.qty}</Text>
                   <TouchableOpacity
                     style={styles.stepBtn}
                     onPress={() => handleAddOne(item.id)}
                   >
-                    <Text style={styles.stepText}>+</Text>
+                    <Ionicons name="add" size={16} color={COLORS.white} />
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.itemTotal}>₹{item.price * item.qty}</Text>
@@ -121,7 +137,12 @@ export default function CartScreen() {
 
             {/* Coupon */}
             <View style={styles.couponBox}>
-              <Text style={styles.couponIcon}>🏷️</Text>
+              <Ionicons
+                name="pricetag"
+                size={18}
+                color={COLORS.accent}
+                style={{ marginRight: 8 }}
+              />
               <Text style={styles.couponText}>Apply coupon code</Text>
               <TouchableOpacity style={styles.couponBtn}>
                 <Text style={styles.couponBtnText}>APPLY</Text>
@@ -159,10 +180,15 @@ export default function CartScreen() {
 
             {/* Delivery Address */}
             <View style={styles.addressBox}>
-              <Text style={styles.addressIcon}>📍</Text>
+              <Ionicons
+                name="location-sharp"
+                size={20}
+                color={COLORS.accent}
+                style={{ marginRight: 10 }}
+              />
               <View style={{ flex: 1 }}>
                 <Text style={styles.addressLabel}>Delivering to</Text>
-                <Text style={styles.addressText}>Flat 3B, MG Road, Indore</Text>
+                <Text style={styles.addressText}>Rajnandgaon, CG</Text>
               </View>
               <TouchableOpacity>
                 <Text style={styles.changeText}>Change</Text>
@@ -179,7 +205,8 @@ export default function CartScreen() {
               <Text style={styles.ctaTotal}>₹{total}</Text>
             </View>
             <TouchableOpacity style={styles.ctaBtn} onPress={handlePlaceOrder}>
-              <Text style={styles.ctaBtnText}>Place Order →</Text>
+              <Text style={styles.ctaBtnText}>Place Order</Text>
+              <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
             </TouchableOpacity>
           </View>
         </>
@@ -201,7 +228,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
-  backIcon: { fontSize: 20, color: COLORS.accent },
   headerTitle: {
     flex: 1,
     fontSize: 20,
@@ -209,8 +235,9 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
   },
   badge: {
-    width: 28,
+    minWidth: 28,
     height: 28,
+    paddingHorizontal: 8,
     borderRadius: 14,
     backgroundColor: COLORS.accent,
     alignItems: "center",
@@ -238,12 +265,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
     borderRadius: 14,
-    padding: 14,
+    padding: 12,
     marginBottom: 8,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
+  restaurantImage: { width: 50, height: 50, borderRadius: 10 },
   restaurantName: { fontSize: 16, fontWeight: "700", color: COLORS.accent },
+  restaurantMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
   restaurantSub: { fontSize: 13, color: COLORS.textSecondary },
   sectionTitle: {
     fontSize: 16,
@@ -260,9 +294,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 8,
     borderRadius: 14,
-    padding: 12,
+    padding: 10,
     gap: 6,
   },
+  cartItemImage: { width: 50, height: 50, borderRadius: 10 },
   itemName: {
     fontSize: 14,
     fontWeight: "700",
@@ -277,20 +312,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   stepBtn: {
-    width: 30,
-    height: 30,
+    width: 28,
+    height: 28,
     alignItems: "center",
     justifyContent: "center",
   },
-  stepText: { color: COLORS.white, fontSize: 18, fontWeight: "700" },
   qtyText: {
     color: COLORS.white,
     fontWeight: "800",
-    fontSize: 14,
-    paddingHorizontal: 8,
+    fontSize: 13,
+    paddingHorizontal: 6,
   },
   itemTotal: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "800",
     color: COLORS.accent,
     minWidth: 48,
@@ -309,7 +343,6 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     borderColor: COLORS.accent,
   },
-  couponIcon: { fontSize: 20, marginRight: 8 },
   couponText: { flex: 1, fontSize: 14, color: COLORS.textSecondary },
   couponBtn: {
     backgroundColor: COLORS.accent,
@@ -350,7 +383,6 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 8,
   },
-  addressIcon: { fontSize: 20, marginRight: 10 },
   addressLabel: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 2 },
   addressText: { fontSize: 14, fontWeight: "600", color: COLORS.accent },
   changeText: { color: COLORS.accent, fontWeight: "700", fontSize: 13 },
@@ -374,6 +406,9 @@ const styles = StyleSheet.create({
   ctaLabel: { color: COLORS.secondary, fontSize: 12 },
   ctaTotal: { color: COLORS.white, fontSize: 18, fontWeight: "800" },
   ctaBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 10,
     paddingHorizontal: 16,

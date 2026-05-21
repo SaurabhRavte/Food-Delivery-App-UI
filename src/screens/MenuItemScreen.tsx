@@ -5,10 +5,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS } from "../data/mockData";
 import { useCart } from "../context/CartContext";
@@ -32,7 +34,7 @@ export default function MenuItemScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={{ padding: 24 }}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{ fontSize: 20, color: COLORS.accent }}>← Back</Text>
+            <Ionicons name="arrow-back" size={24} color={COLORS.accent} />
           </TouchableOpacity>
           <Text style={{ marginTop: 24, fontSize: 18 }}>Item not found.</Text>
         </View>
@@ -48,19 +50,23 @@ export default function MenuItemScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["bottom"]}>
       {/* Back */}
       <TouchableOpacity
         style={styles.backBtn}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backIcon}>←</Text>
+        <Ionicons name="arrow-back" size={22} color={COLORS.accent} />
       </TouchableOpacity>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero */}
-        <View style={[styles.hero, { backgroundColor: restaurant.bgColor }]}>
-          <Text style={styles.heroEmoji}>{item.emoji}</Text>
+        {/* Hero image */}
+        <View style={styles.hero}>
+          <Image
+            source={{ uri: item.image }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
         </View>
 
         <View style={styles.body}>
@@ -85,7 +91,7 @@ export default function MenuItemScreen() {
               <Text style={styles.itemName}>{item.name}</Text>
             </View>
             <View style={styles.ratingBox}>
-              <Text style={styles.ratingEmoji}>⭐</Text>
+              <Ionicons name="star" size={14} color={COLORS.star} />
               <Text style={styles.ratingVal}>{item.rating}</Text>
             </View>
           </View>
@@ -95,16 +101,31 @@ export default function MenuItemScreen() {
           {/* Tags */}
           <View style={styles.tagsRow}>
             <View style={styles.tag}>
-              <Text style={styles.tagText}>🍽️ {item.category}</Text>
+              <Ionicons
+                name="pricetag-outline"
+                size={13}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.tagText}>{item.category}</Text>
             </View>
             <View style={styles.tag}>
-              <Text style={styles.tagText}>🏪 {restaurant.name}</Text>
+              <Ionicons
+                name="storefront-outline"
+                size={13}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.tagText} numberOfLines={1}>
+                {restaurant.name}
+              </Text>
             </View>
           </View>
 
           {/* Nutritional Note */}
           <View style={styles.noteBox}>
-            <Text style={styles.noteTitle}>Chef's Note</Text>
+            <View style={styles.noteHeader}>
+              <Ionicons name="restaurant" size={16} color={COLORS.accent} />
+              <Text style={styles.noteTitle}>Chef's Note</Text>
+            </View>
             <Text style={styles.noteText}>
               Made fresh to order with quality ingredients. Allergen info
               available on request. Spice level can be customised — just mention
@@ -123,14 +144,14 @@ export default function MenuItemScreen() {
                 style={styles.stepBtn}
                 onPress={() => setQty((q) => Math.max(1, q - 1))}
               >
-                <Text style={styles.stepText}>−</Text>
+                <Ionicons name="remove" size={22} color={COLORS.white} />
               </TouchableOpacity>
               <Text style={styles.qtyText}>{qty}</Text>
               <TouchableOpacity
                 style={styles.stepBtn}
                 onPress={() => setQty((q) => q + 1)}
               >
-                <Text style={styles.stepText}>+</Text>
+                <Ionicons name="add" size={22} color={COLORS.white} />
               </TouchableOpacity>
             </View>
           </View>
@@ -146,7 +167,8 @@ export default function MenuItemScreen() {
       {/* Add to Cart CTA */}
       <View style={styles.ctaBar}>
         <TouchableOpacity style={styles.ctaBtn} onPress={handleAddToCart}>
-          <Text style={styles.ctaBtnText}>+ Add to Cart • ₹{total}</Text>
+          <Ionicons name="cart" size={18} color={COLORS.white} />
+          <Text style={styles.ctaBtnText}>Add to Cart • ₹{total}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -157,25 +179,22 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   backBtn: {
     position: "absolute",
-    top: 16,
+    top: 48,
     left: 16,
     zIndex: 10,
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 20,
     backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: COLORS.border,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 3,
+    elevation: 4,
   },
-  backIcon: { fontSize: 20, color: COLORS.accent },
-  hero: { height: 240, alignItems: "center", justifyContent: "center" },
-  heroEmoji: { fontSize: 110 },
+  hero: { height: 280, backgroundColor: COLORS.background },
+  heroImage: { width: "100%", height: "100%" },
 
   body: { padding: 20 },
   titleRow: {
@@ -202,7 +221,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     gap: 4,
   },
-  ratingEmoji: { fontSize: 14 },
   ratingVal: { fontSize: 16, fontWeight: "800", color: "#e6a800" },
 
   description: {
@@ -212,14 +230,18 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  tagsRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
+  tagsRow: { flexDirection: "row", gap: 8, marginBottom: 16, flexWrap: "wrap" },
   tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: COLORS.white,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1.5,
     borderColor: COLORS.border,
+    maxWidth: "60%",
   },
   tagText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: "600" },
 
@@ -231,11 +253,16 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: COLORS.accent,
   },
+  noteHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 6,
+  },
   noteTitle: {
     fontSize: 13,
     fontWeight: "700",
     color: COLORS.accent,
-    marginBottom: 6,
   },
   noteText: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 20 },
 
@@ -265,7 +292,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  stepText: { color: COLORS.white, fontSize: 22, fontWeight: "700" },
   qtyText: {
     color: COLORS.white,
     fontSize: 16,
@@ -288,10 +314,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   ctaBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
     backgroundColor: COLORS.accent,
     borderRadius: 16,
     padding: 16,
-    alignItems: "center",
     shadowColor: COLORS.accent,
     shadowOpacity: 0.35,
     shadowRadius: 10,

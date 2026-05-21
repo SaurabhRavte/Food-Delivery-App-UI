@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../theme/colors";
 import type { RootStackParamList } from "../../navigation";
 
@@ -21,7 +22,9 @@ export default function OnboardingThree() {
       </View>
 
       <View style={styles.illustration}>
-        <Text style={styles.emoji}>🎉</Text>
+        <View style={styles.iconCircle}>
+          <Ionicons name="happy" size={104} color={COLORS.accent} />
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -41,6 +44,7 @@ export default function OnboardingThree() {
           onPress={() => navigation.replace("Login")}
         >
           <Text style={styles.nextText}>Get Started</Text>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -74,7 +78,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-  emoji: { fontSize: 140 },
+  iconCircle: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: { paddingBottom: 16 },
   title: {
     fontSize: 28,
@@ -92,10 +103,13 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.border },
   dotActive: { width: 24, backgroundColor: COLORS.accent },
   nextBtn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
     backgroundColor: COLORS.accent,
     borderRadius: 14,
     padding: 16,
-    alignItems: "center",
     shadowColor: COLORS.accent,
     shadowOpacity: 0.3,
     shadowRadius: 10,

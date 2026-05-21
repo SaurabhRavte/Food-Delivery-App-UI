@@ -8,22 +8,41 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../theme/colors";
 import { useAuth } from "../context/AuthContext";
+
+type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const { user, logout } = useAuth();
 
-  const menuItems = [
-    { icon: "📦", label: "My Orders", sub: "3 past orders" },
-    { icon: "📍", label: "Saved Addresses", sub: "Flat 3B, MG Road" },
-    { icon: "💳", label: "Payment Methods", sub: "Cash on Delivery" },
-    { icon: "🎁", label: "Offers & Coupons", sub: "2 active coupons" },
-    { icon: "⭐", label: "Rate Us", sub: "Love Cravely? Tell us!" },
-    { icon: "🔔", label: "Notifications", sub: "Enabled" },
-    { icon: "🛡️", label: "Privacy Policy", sub: "" },
-    { icon: "❓", label: "Help & Support", sub: "" },
+  const menuItems: {
+    icon: IoniconName;
+    label: string;
+    sub: string;
+  }[] = [
+    { icon: "receipt-outline", label: "My Orders", sub: "3 past orders" },
+    {
+      icon: "location-outline",
+      label: "Saved Addresses",
+      sub: "Flat 27, 3rd Floor, West",
+    },
+    {
+      icon: "card-outline",
+      label: "Payment Methods",
+      sub: "Cash on Delivery",
+    },
+    {
+      icon: "gift-outline",
+      label: "Offers & Coupons",
+      sub: "2 active coupons",
+    },
+    { icon: "star-outline", label: "Rate Us", sub: "Love Cravely? Tell us!" },
+    { icon: "notifications-outline", label: "Notifications", sub: "Enabled" },
+    { icon: "shield-checkmark-outline", label: "Privacy Policy", sub: "" },
+    { icon: "help-circle-outline", label: "Help & Support", sub: "" },
   ];
 
   const canGoBack = navigation.canGoBack();
@@ -37,7 +56,7 @@ export default function ProfileScreen() {
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backIcon}>←</Text>
+            <Ionicons name="arrow-back" size={20} color={COLORS.accent} />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 40 }} />
@@ -58,6 +77,7 @@ export default function ProfileScreen() {
             <Text style={styles.userPhone}>{user?.phone}</Text>
           </View>
           <TouchableOpacity style={styles.editBtn}>
+            <Ionicons name="create-outline" size={14} color={COLORS.accent} />
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
         </View>
@@ -91,7 +111,7 @@ export default function ProfileScreen() {
               ]}
             >
               <View style={styles.menuIcon}>
-                <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+                <Ionicons name={item.icon} size={20} color={COLORS.accent} />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={styles.menuLabel}>{item.label}</Text>
@@ -99,14 +119,19 @@ export default function ProfileScreen() {
                   <Text style={styles.menuSub}>{item.sub}</Text>
                 ) : null}
               </View>
-              <Text style={styles.menuArrow}>›</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={COLORS.textMuted}
+              />
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Text style={styles.logoutText}>🚪 Sign Out</Text>
+          <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
+          <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
 
         <Text style={styles.version}>Cravely v1.0.0</Text>
@@ -134,7 +159,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
-  backIcon: { fontSize: 20, color: COLORS.accent },
   headerTitle: { fontSize: 20, fontWeight: "800", color: COLORS.accent },
 
   profileCard: {
@@ -163,9 +187,12 @@ const styles = StyleSheet.create({
   userEmail: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   userPhone: { fontSize: 13, color: COLORS.textSecondary },
   editBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     backgroundColor: COLORS.background,
     borderRadius: 10,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 7,
     borderWidth: 1.5,
     borderColor: COLORS.border,
@@ -206,14 +233,16 @@ const styles = StyleSheet.create({
   },
   menuLabel: { fontSize: 15, fontWeight: "600", color: COLORS.accent },
   menuSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
-  menuArrow: { fontSize: 22, color: COLORS.textMuted },
 
   logoutBtn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
     marginHorizontal: 16,
     backgroundColor: "#fff0f0",
     borderRadius: 14,
     padding: 16,
-    alignItems: "center",
     borderWidth: 1.5,
     borderColor: "#ffc5c5",
     marginBottom: 12,

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   StatusBar,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../theme/colors";
 import { RESTAURANTS, CATEGORIES } from "../data/mockData";
 import { useAuth } from "../context/AuthContext";
@@ -27,10 +29,9 @@ type TabParamList = {
   Profile: undefined;
 };
 
-type Nav = CompositeNavigationProp<
-  BottomTabNavigationProp<TabParamList, "Home">,
-  NativeStackNavigationProp<AppStackParamList>
->;
+type TabNav = BottomTabNavigationProp<TabParamList, "Home">;
+type AppNav = NativeStackNavigationProp<AppStackParamList>;
+type Nav = CompositeNavigationProp<TabNav, AppNav>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
@@ -59,11 +60,15 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>
-              Hey, {user?.name?.split(" ")[0] ?? "there"} 👋
+              Hey, {user?.name?.split(" ")[0] ?? "there"}
             </Text>
             <View style={styles.locationRow}>
-              <Text style={styles.locationIcon}>📍</Text>
-              <Text style={styles.location}>Indore, MP</Text>
+              <Ionicons
+                name="location-sharp"
+                size={13}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.location}>Rajnandgaon, CG</Text>
             </View>
           </View>
           <TouchableOpacity
@@ -75,8 +80,17 @@ export default function HomeScreen() {
         </View>
 
         {/* Search */}
-        <View style={styles.searchRow}>
-          <Text style={styles.searchIcon}>🔍</Text>
+        <TouchableOpacity
+          style={styles.searchRow}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate("Search")}
+        >
+          <Ionicons
+            name="search"
+            size={18}
+            color={COLORS.textMuted}
+            style={{ marginRight: 8 }}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Search restaurants or dishes..."
@@ -86,10 +100,14 @@ export default function HomeScreen() {
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch("")}>
-              <Text style={{ fontSize: 18, color: COLORS.textMuted }}>✕</Text>
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={COLORS.textMuted}
+              />
             </TouchableOpacity>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* Banner */}
         <View style={styles.banner}>
@@ -102,7 +120,9 @@ export default function HomeScreen() {
               <Text style={styles.bannerBtnText}>Order Now</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.bannerEmoji}>🍜</Text>
+          <View style={styles.bannerIconWrap}>
+            <Ionicons name="fast-food" size={56} color={COLORS.white} />
+          </View>
         </View>
 
         {/* Categories */}
@@ -148,14 +168,18 @@ export default function HomeScreen() {
             }
             activeOpacity={0.85}
           >
-            {/* Card Image Area */}
+            {/* Card Image */}
             <View
               style={[
-                styles.cardImage,
+                styles.cardImageWrap,
                 { backgroundColor: restaurant.bgColor },
               ]}
             >
-              <Text style={styles.cardEmoji}>{restaurant.emoji}</Text>
+              <Image
+                source={{ uri: restaurant.image }}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
               {restaurant.offer && (
                 <View style={styles.offerBadge}>
                   <Text style={styles.offerText}>{restaurant.offer}</Text>
@@ -167,24 +191,36 @@ export default function HomeScreen() {
               <View style={styles.cardTopRow}>
                 <Text style={styles.cardName}>{restaurant.name}</Text>
                 <View style={styles.ratingChip}>
-                  <Text style={styles.starText}>⭐</Text>
+                  <Ionicons name="star" size={11} color={COLORS.star} />
                   <Text style={styles.ratingText}>{restaurant.rating}</Text>
                 </View>
               </View>
               <Text style={styles.cardCuisine}>{restaurant.cuisine}</Text>
               <View style={styles.cardMeta}>
                 <View style={styles.metaItem}>
-                  <Text style={styles.metaIcon}>⏱</Text>
+                  <Ionicons
+                    name="time-outline"
+                    size={13}
+                    color={COLORS.textSecondary}
+                  />
                   <Text style={styles.metaText}>{restaurant.deliveryTime}</Text>
                 </View>
                 <View style={styles.metaDot} />
                 <View style={styles.metaItem}>
-                  <Text style={styles.metaIcon}>📍</Text>
+                  <Ionicons
+                    name="location-outline"
+                    size={13}
+                    color={COLORS.textSecondary}
+                  />
                   <Text style={styles.metaText}>{restaurant.distance}</Text>
                 </View>
                 <View style={styles.metaDot} />
                 <View style={styles.metaItem}>
-                  <Text style={styles.metaIcon}>🛵</Text>
+                  <Ionicons
+                    name="bicycle-outline"
+                    size={13}
+                    color={COLORS.textSecondary}
+                  />
                   <Text style={styles.metaText}>
                     {restaurant.deliveryFee === 0
                       ? "Free"
@@ -198,7 +234,11 @@ export default function HomeScreen() {
 
         {filtered.length === 0 && (
           <View style={styles.emptyState}>
-            <Text style={{ fontSize: 48 }}>🍽️</Text>
+            <Ionicons
+              name="restaurant-outline"
+              size={56}
+              color={COLORS.textMuted}
+            />
             <Text style={styles.emptyText}>No restaurants found</Text>
             <Text style={styles.emptySubText}>
               Try a different search or category
@@ -223,8 +263,12 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   greeting: { fontSize: 22, fontWeight: "800", color: COLORS.accent },
-  locationRow: { flexDirection: "row", alignItems: "center", marginTop: 4 },
-  locationIcon: { fontSize: 12 },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 2,
+  },
   location: { fontSize: 13, color: COLORS.textSecondary, marginLeft: 2 },
   avatar: {
     width: 44,
@@ -252,7 +296,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: {
     flex: 1,
     fontSize: 14,
@@ -297,7 +340,15 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   bannerBtnText: { color: COLORS.accent, fontWeight: "700", fontSize: 13 },
-  bannerEmoji: { fontSize: 64 },
+  bannerIconWrap: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+  },
 
   sectionTitle: {
     fontSize: 18,
@@ -339,13 +390,14 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  cardImage: {
-    height: 140,
-    alignItems: "center",
-    justifyContent: "center",
+  cardImageWrap: {
+    height: 160,
     position: "relative",
   },
-  cardEmoji: { fontSize: 72 },
+  cardImage: {
+    width: "100%",
+    height: "100%",
+  },
   offerBadge: {
     position: "absolute",
     top: 10,
@@ -373,12 +425,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     gap: 3,
   },
-  starText: { fontSize: 12 },
   ratingText: { fontSize: 13, fontWeight: "700", color: "#e6a800" },
   cardCuisine: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 10 },
   cardMeta: { flexDirection: "row", alignItems: "center" },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 3 },
-  metaIcon: { fontSize: 12 },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, color: COLORS.textSecondary },
   metaDot: {
     width: 3,
@@ -388,7 +438,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
 
-  emptyState: { alignItems: "center", paddingVertical: 48 },
+  emptyState: { alignItems: "center", paddingVertical: 48, gap: 8 },
   emptyText: {
     fontSize: 18,
     fontWeight: "700",

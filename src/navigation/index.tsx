@@ -2,7 +2,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import OnboardingOne from "../screens/auth/OnboardingOne";
 import OnboardingTwo from "../screens/auth/OnboardingTwo";
@@ -49,6 +49,8 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const AppStack = createNativeStackNavigator<AppStackParamList>();
 const Tabs = createBottomTabNavigator();
 
+type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
+
 function TabsNav() {
   return (
     <Tabs.Navigator
@@ -56,16 +58,31 @@ function TabsNav() {
         headerShown: false,
         tabBarActiveTintColor: COLORS.accent,
         tabBarInactiveTintColor: COLORS.textMuted,
-        tabBarIcon: ({ size }) => {
-          const icons: Record<string, string> = {
-            Home: "🏠",
-            Search: "🔍",
-            Orders: "📦",
-            Profile: "👤",
+        tabBarStyle: {
+          borderTopColor: COLORS.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarIcon: ({ color, focused, size }) => {
+          const icons: Record<string, [IoniconName, IoniconName]> = {
+            Home: ["home-outline", "home"],
+            Search: ["search-outline", "search"],
+            Orders: ["receipt-outline", "receipt"],
+            Profile: ["person-outline", "person"],
           };
-
-          const fontSize = (size ?? 22) - 4;
-          return <Text style={{ fontSize }}>{icons[route.name]}</Text>;
+          const [outline, filled] = icons[route.name] ?? [
+            "ellipse-outline",
+            "ellipse",
+          ];
+          return (
+            <Ionicons
+              name={focused ? filled : outline}
+              size={(size ?? 22) + 2}
+              color={color}
+            />
+          );
         },
       })}
     >
